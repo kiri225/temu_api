@@ -1,0 +1,10 @@
+{
+  "env": "prod",
+  "debug": false,
+  "region": "CN",
+  "app_key": "your_app_key",
+  "app_secret": "your_app_secret",
+  "access_token": "your_access_token",
+  "timeout": 30,
+  "verify_ssl": true
+}

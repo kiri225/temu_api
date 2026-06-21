@@ -1,0 +1,21 @@
+services:
+  temu-playground:
+    build: .
+    image: temu-go-playground:latest
+    container_name: temu-playground
+    ports:
+      - "${PLAYGROUND_PORT:-8080}:8080"
+    volumes:
+      # 复制 config/config.json.example 为 config/config.json 并填入真实凭证
+      - ./config/config.json:/config/config.json:ro
+      # 不可用接口标记持久化（可写）
+      - ./data/unavailable.json:/data/unavailable.json
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/api/config"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

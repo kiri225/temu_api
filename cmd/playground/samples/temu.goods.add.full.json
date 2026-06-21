@@ -1,0 +1,109 @@
+{
+  "cat1Id": 1464,
+  "cat2Id": 1650,
+  "cat3Id": 1651,
+  "cat4Id": 1655,
+  "cat5Id": 1656,
+  "cat6Id": 0,
+  "cat7Id": 0,
+  "cat8Id": 0,
+  "cat9Id": 0,
+  "cat10Id": 0,
+  "productName": "4fum/LargeProtection",
+  "productPropertyReqs": [
+    {"templatePid": 1376917, "pid": 736, "refPid": 777, "propName": "品种推荐", "vid": 60501, "propValue": "小型", "valueUnit": "", "valueExtendInfo": ""},
+    {"templatePid": 1376917, "pid": 736, "refPid": 777, "propName": "品种推荐", "vid": 60502, "propValue": "中型", "valueUnit": "", "valueExtendInfo": ""},
+    {"templatePid": 1376917, "pid": 736, "refPid": 777, "propName": "品种推荐", "vid": 60503, "propValue": "大型", "valueUnit": "", "valueExtendInfo": ""},
+    {"templatePid": 1376920, "pid": 1728, "refPid": 2417, "propName": "主穿戴方式", "vid": 60510, "propValue": "粘扣带(魔术贴)", "valueUnit": "", "valueExtendInfo": ""},
+    {"templatePid": 1376921, "pid": 89, "refPid": 121, "propName": "材料", "vid": 26502, "propValue": "pu革", "valueUnit": "", "valueExtendInfo": ""}
+  ],
+  "carouselImageUrls": [
+    "https://img.kwcdn.com/product/open/5b151e0e1b0a4e6798f2036b1a34f1a8-goods.jpeg",
+    "https://img.kwcdn.com/product/open/5b151e0e1b0a4e6798f2036b1a34f1a8-goods.jpeg",
+    "https://img.kwcdn.com/product/open/64db8d9470ba46b7bebc3e82ef8acded-goods.jpeg",
+    "https://img.kwcdn.com/product/open/e9d31485c38042b1bc35f88d9b924b80-goods.jpeg",
+    "https://img.kwcdn.com/product/open/0e8ffa968c394db8ac069019a28c79c0-goods.jpeg",
+    "https://img.kwcdn.com/product/open/e5a92c72a5a0437ba77b92256b1a401d-goods.jpeg"
+  ],
+  "materialImgUrl": "https://img.kwcdn.com/product/open/5b151e0e1b0a4e6798f2036b1a34f1a8-goods.jpeg",
+  "productWhExtAttrReq": {
+    "outerGoodsUrl": "",
+    "productOrigin": {
+      "region1ShortName": "CN",
+      "region2Id": 43000000000022
+    },
+    "productOriginCertFiles": []
+  },
+  "productOuterPackageReq": {"packageShape": 0, "packageType": 0},
+  "productOuterPackageImageReqs": [
+    {"imageUrl": "https://pfs.file.temu.com/product-material-private-tag/open/b64c6cbab9a34701a2d683fa9c09f9c1-goods.jpeg"}
+  ],
+  "productSpecPropertyReqs": [
+    {"parentSpecId": 3001, "parentSpecName": "尺码", "refPid": 65, "pid": 14, "templatePid": 1376913, "propName": "尺码", "specId": 17014, "specName": "均码", "propValue": "均码", "vid": 26018, "valueUnit": "", "valueGroupId": 2, "valueGroupName": "中国码", "valueExtendInfo": ""}
+  ],
+  "productSkcReqs": [
+    {
+      "previewImgUrls": [
+        "https://img.kwcdn.com/product/open/5b151e0e1b0a4e6798f2036b1a34f1a8-goods.jpeg",
+        "https://img.kwcdn.com/product/open/5b151e0e1b0a4e6798f2036b1a34f1a8-goods.jpeg",
+        "https://img.kwcdn.com/product/open/64db8d9470ba46b7bebc3e82ef8acded-goods.jpeg",
+        "https://img.kwcdn.com/product/open/e9d31485c38042b1bc35f88d9b924b80-goods.jpeg",
+        "https://img.kwcdn.com/product/open/0e8ffa968c394db8ac069019a28c79c0-goods.jpeg",
+        "https://img.kwcdn.com/product/open/e5a92c72a5a0437ba77b92256b1a401d-goods.jpeg"
+      ],
+      "originalPreviewImgUrls": [
+        "https://img.ltwebstatic.com/v4/j/spmp/2025/05/29/76/1748503887324d976da60ca96e539a92558756ff48_square.jpg",
+        "https://img.ltwebstatic.com/v4/j/spmp/2025/05/29/40/174850389194782fb6fdc26ab2a7a61e9ddee29255_square.jpg",
+        "https://img.ltwebstatic.com/v4/j/spmp/2025/05/29/ee/17485038968de4b69fce66790110bf42c9d2e56e4a_square.jpg",
+        "https://img.ltwebstatic.com/v4/j/spmp/2025/05/29/dc/1748503900b89ee0e35d8b4fada80499d8c63aa7ed_square.jpg",
+        "https://img.ltwebstatic.com/v4/j/spmp/2025/05/29/0b/17485039044126cbd17718cb69b44e7207b97661ea_square.jpg",
+        "https://img.ltwebstatic.com/v4/j/spmp/2025/05/29/b4/1748503908c07c2c8ba28fdc8b18e04e253eec3133_square.jpg"
+      ],
+      "productSkcCarouselImageI18nReqs": [],
+      "extCode": "AL659526069080",
+      "mainProductSkuSpecReqs": [{"parentSpecId": 0, "parentSpecName": "", "specId": 0, "specName": ""}],
+      "productSkuReqs": [
+        {
+          "currencyType": "CNY",
+          "thumbUrl": "https://img.kwcdn.com/product/open/5b151e0e1b0a4e6798f2036b1a34f1a8-goods.jpeg",
+          "productSkuThumbUrlI18nReqs": [],
+          "extCode": "",
+          "supplierPrice": 1,
+          "productSkuSpecReqs": [
+            {"parentSpecId": 3001, "parentSpecName": "尺码", "specId": 17014, "specName": "均码"},
+            {"parentSpecId": 1001, "parentSpecName": "颜色", "specId": 17106, "specName": "black"}
+          ],
+          "productSkuWhExtAttrReq": {
+            "productSkuVolumeReq": {"len": 10, "width": 10, "height": 10},
+            "productSkuWeightReq": {"value": 10000},
+            "productSkuBarCodeReqs": [],
+            "productSkuSensitiveAttrReq": {"isSensitive": 0, "sensitiveList": []}
+          },
+          "productSkuMultiPackReq": {"numberOfPieces": 2, "skuClassification": 3, "pieceUnitCode": 1, "individuallyPacked": 1},
+          "productSkuSuggestedPriceReq": {"suggestedPrice": 1999700, "suggestedPriceCurrencyType": "CNY"},
+          "productSkuAccessoriesReq": {"productSkuAccessories": [{"vid": 222158, "num": 2, "unitCode": 1}]}
+        },
+        {
+          "currencyType": "CNY",
+          "thumbUrl": "https://img.kwcdn.com/product/open/5b151e0e1b0a4e6798f2036b1a34f1a8-goods.jpeg",
+          "productSkuThumbUrlI18nReqs": [],
+          "extCode": "",
+          "supplierPrice": 1,
+          "productSkuSpecReqs": [
+            {"parentSpecId": 3001, "parentSpecName": "尺码", "specId": 17014, "specName": "均码"},
+            {"parentSpecId": 1001, "parentSpecName": "颜色", "specId": 50402811, "specName": "wwww"}
+          ],
+          "productSkuWhExtAttrReq": {
+            "productSkuVolumeReq": {"len": 10, "width": 10, "height": 10},
+            "productSkuWeightReq": {"value": 10000},
+            "productSkuBarCodeReqs": [],
+            "productSkuSensitiveAttrReq": {"isSensitive": 0, "sensitiveList": []}
+          },
+          "productSkuMultiPackReq": {"numberOfPieces": 1, "skuClassification": 1, "pieceUnitCode": 1, "numberOfPiecesNew": 3, "pieceNewUnitCode": 1},
+          "productSkuSuggestedPriceReq": {"suggestedPrice": 19997, "suggestedPriceCurrencyType": "JPY"}
+        }
+      ]
+    }
+  ],
+  "productCustomReq": {"goodsLabelName": "aaa", "isRecommendedTag": "false"}
+}

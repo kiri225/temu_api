@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Temu API Playground</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Temu API Playground</h1>
+    <div id="config-badge" class="config-badge">加载配置中...</div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="search-box">
+        <input type="search" id="search" placeholder="搜索接口...">
+      </div>
+      <nav id="api-list"></nav>
+    </aside>
+
+    <main class="workspace">
+      <section class="panel">
+        <div id="api-desc" class="api-desc"></div>
+
+        <div class="mark-panel">
+          <div class="mark-panel-row">
+            <input
+              type="text"
+              id="unavailable-note"
+              class="mark-note-input"
+              placeholder="不可用备注（可选，如：缺参数 / 网关不对）"
+            >
+            <button
+              id="mark-unavailable-btn"
+              class="btn-secondary btn-mark-unavailable"
+              type="button"
+              title="标记后写入 unavailable.json，重启后仍保留"
+            >
+              标记不可用
+            </button>
+          </div>
+          <p class="mark-hint">在左侧列表点击 ★ 也可快速标记；标记会保存到 <code>cmd/playground/unavailable.json</code></p>
+        </div>
+
+        <label for="api-type">API Type</label>
+        <input type="text" id="api-type" placeholder="例如 bg.mall.info.get">
+
+        <label for="request-body">请求 Body (JSON)</label>
+        <textarea id="request-body" rows="12" spellcheck="false"></textarea>
+
+        <div class="actions">
+          <button id="send-btn" class="btn-primary">发送请求</button>
+          <button id="format-btn" class="btn-secondary">格式化 JSON</button>
+          <button id="clear-btn" class="btn-secondary">清空</button>
+        </div>
+      </section>
+
+      <section class="panel response-panel">
+        <div class="response-header">
+          <h2>响应结果</h2>
+          <span id="meta" class="meta"></span>
+        </div>
+        <pre id="response" class="response">等待请求...</pre>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "byId": {
+    "mall-permission": {}
+  },
+  "byType": {
+    "bg.open.accesstoken.info.get.global": {}
+  }
+}
