@@ -6,10 +6,8 @@ services:
     ports:
       - "${PLAYGROUND_PORT:-8080}:8080"
     volumes:
-      # 复制 config/config.json.example 为 config/config.json 并填入真实凭证
-      - ./config/config.json:/config/config.json:ro
-      # 不可用接口标记持久化（可写）
-      - ./data/unavailable.json:/data/unavailable.json
+      - ${TEMU_CONFIG_PATH:-./config/config.json}:/config/config.json:ro
+      - ${TEMU_UNAVAILABLE_PATH:-./cmd/playground/unavailable.json}:/data/unavailable.json
     environment:
       TZ: ${TZ:-Asia/Shanghai}
     restart: unless-stopped
