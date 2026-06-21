@@ -4,6 +4,9 @@ FROM golang:1.23-alpine AS builder
 
 WORKDIR /src
 
+ENV GOPROXY=https://goproxy.cn,direct
+ENV GOSUMDB=sum.golang.google.cn
+
 RUN apk add --no-cache git ca-certificates
 
 COPY go.mod go.sum ./
