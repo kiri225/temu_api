@@ -22,18 +22,17 @@ if (Test-Path "cmd\playground\unavailable.json") {
     scp cmd\playground\unavailable.json "${Server}:${DataDir}/unavailable.json"
 }
 
+Write-Host ">> 同步代码到服务器（绕过 GitHub 直连）..." -ForegroundColor Cyan
+ssh $Server "mkdir -p $InstallDir"
+git archive --format=tar HEAD | ssh $Server "tar -x -C $InstallDir"
+
 Write-Host ">> 在服务器执行部署..." -ForegroundColor Cyan
 ssh $Server @"
 set -e
 export INSTALL_DIR='$InstallDir'
 export DATA_DIR='$DataDir'
 export PLAYGROUND_PORT='$Port'
-if [ -f `$INSTALL_DIR/server-deploy.sh ]; then
-  bash `$INSTALL_DIR/server-deploy.sh
-else
-  git clone -b master git@github.com:kiri225/temu_api.git `$INSTALL_DIR
-  bash `$INSTALL_DIR/server-deploy.sh
-fi
+bash `$INSTALL_DIR/server-deploy.sh
 "@
 
 Write-Host ""
