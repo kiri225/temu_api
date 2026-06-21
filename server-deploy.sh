@@ -73,6 +73,19 @@ if [[ ! -f "$DATA_DIR/unavailable.json" ]]; then
   fi
 fi
 
+# 容器内以非 root 用户 (uid 65532) 运行
+chmod 644 "$DATA_DIR/config/config.json"
+chown 65532:65532 "$DATA_DIR/unavailable.json"
+chmod 644 "$DATA_DIR/unavailable.json"
+
+if [[ -f "$DATA_DIR/playground.env" ]]; then
+  echo ">> 加载登录配置: $DATA_DIR/playground.env"
+  set -a
+  # shellcheck disable=SC1090
+  source "$DATA_DIR/playground.env"
+  set +a
+fi
+
 export TEMU_CONFIG_PATH="$DATA_DIR/config/config.json"
 export TEMU_UNAVAILABLE_PATH="$DATA_DIR/unavailable.json"
 export PLAYGROUND_PORT

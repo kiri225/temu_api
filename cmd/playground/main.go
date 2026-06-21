@@ -24,6 +24,7 @@ var (
 	client      *temu.Client
 	cfg         config.Config
 	unavailable *unavailableStore
+	auth        *authenticator
 )
 
 func main() {
@@ -40,8 +41,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("加载不可用标记失败: %v", err)
 	}
+	auth = newAuthenticator()
 
 	mux := http.NewServeMux()
+	mux.HandleFunc("/health", handleHealth)
+	mux.HandleFunc("/api/auth/login", auth.handleLogin)
+	mux.HandleFunc("/api/auth/logout", auth.handleLogout)
+	mux.HandleFunc("/api/auth/me", auth.handleMe)
 	mux.HandleFunc("/api/config", handleConfig)
 	mux.HandleFunc("/api/catalog", handleCatalog)
 	mux.HandleFunc("/api/unavailable", handleUnavailable)
@@ -53,11 +59,12 @@ func main() {
 	}
 	mux.Handle("/", http.FileServer(http.FS(webRoot)))
 
+	handler := withCORS(auth.middleware(mux))
 	addr := fmt.Sprintf(":%d", *port)
 	log.Printf("Temu API Playground 已启动: http://localhost%s", addr)
 	log.Printf("环境: %s | 区域: %s | 调试: %v", cfg.Env, cfg.Region, cfg.Debug)
 	log.Printf("不可用标记: %s", *unavailablePath)
-	if err := http.ListenAndServe(addr, withCORS(mux)); err != nil {
+	if err := http.ListenAndServe(addr, handler); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -91,6 +98,15 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(v)
+}
+
+func handleHealth(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write([]byte("ok"))
 }
 
 func maskSecret(s string) string {

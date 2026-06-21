@@ -6,15 +6,43 @@ let unavailableState = { byId: {}, byType: {} };
 let activeId = null;
 const collapsed = new Set();
 
+async function apiFetch(url, options = {}) {
+  const res = await fetch(url, options);
+  if (res.status === 401) {
+    window.location.href = "/login.html";
+    throw new Error("未登录");
+  }
+  return res;
+}
+
+async function initAuth() {
+  const res = await fetch("/api/auth/me");
+  const data = await res.json();
+  const logoutBtn = $("#logout-btn");
+  if (data.authEnabled) {
+    logoutBtn.hidden = false;
+    if (!data.authenticated) {
+      window.location.href = "/login.html";
+      return false;
+    }
+  }
+  return true;
+}
+
+async function logout() {
+  await fetch("/api/auth/logout", { method: "POST" });
+  window.location.href = "/login.html";
+}
+
 async function loadConfig() {
-  const res = await fetch("/api/config");
+  const res = await apiFetch("/api/config");
   const cfg = await res.json();
   $("#config-badge").textContent =
     `env=${cfg.env} | region=${cfg.region} | key=${cfg.app_key}`;
 }
 
 async function loadCatalog() {
-  const res = await fetch("/api/catalog");
+  const res = await apiFetch("/api/catalog");
   const data = await res.json();
   categories = data.categories || [];
   catalog = data.apis || data;
@@ -67,7 +95,7 @@ async function saveUnavailableMark(api, type, unavailable, note) {
     return false;
   }
 
-  const res = await fetch("/api/unavailable", {
+  const res = await apiFetch("/api/unavailable", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -274,7 +302,7 @@ async function sendRequest() {
   metaEl.textContent = "";
 
   try {
-    const res = await fetch("/api/invoke", {
+    const res = await apiFetch("/api/invoke", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ type, body }),
@@ -321,6 +349,7 @@ $("#clear-btn").addEventListener("click", () => {
   updateMarkUnavailableButton();
 });
 $("#mark-unavailable-btn").addEventListener("click", toggleUnavailableMark);
+$("#logout-btn").addEventListener("click", logout);
 $("#api-type").addEventListener("input", updateMarkUnavailableButton);
 $("#search").addEventListener("input", (e) => {
   renderCatalog(filterCatalog(e.target.value));
@@ -332,5 +361,8 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-loadConfig();
-loadCatalog();
+(async () => {
+  if (!(await initAuth())) return;
+  loadConfig();
+  loadCatalog();
+})();
