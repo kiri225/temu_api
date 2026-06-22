@@ -507,34 +507,12 @@ body {
 .param-path-cell {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   min-width: 0;
-}
-
-.param-tree-guides {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-}
-
-.param-tree-notch {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 14px;
-  color: var(--primary);
-  opacity: 0.45;
-  font-size: 12px;
-  line-height: 1;
-  user-select: none;
 }
 
 .param-row--branch .param-segment {
   font-weight: 500;
-}
-
-.param-row[data-depth="0"] .param-tree-notch {
-  display: none;
 }
 
 .param-expand-btn {

@@ -224,19 +224,6 @@ function parseRequestBodyObject(bodyText) {
   }
 }
 
-function createTreeGuides(depth) {
-  const guides = document.createElement("span");
-  guides.className = "param-tree-guides";
-  guides.setAttribute("aria-hidden", "true");
-  for (let i = 0; i < depth; i++) {
-    const notch = document.createElement("span");
-    notch.className = "param-tree-notch";
-    notch.textContent = "›";
-    guides.appendChild(notch);
-  }
-  return guides;
-}
-
 function createExpandControl(row) {
   if (!row.hasChildren) {
     const spacer = document.createElement("span");
@@ -287,8 +274,8 @@ function renderParamNotesTable(resetCollapse = true) {
 
     const cell = document.createElement("div");
     cell.className = "param-path-cell";
+    cell.style.paddingLeft = `${8 + row.depth * 18}px`;
 
-    cell.appendChild(createTreeGuides(row.depth));
     cell.appendChild(createExpandControl(row));
 
     const segment = document.createElement("span");
