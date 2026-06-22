@@ -8,7 +8,7 @@ REPO="${TEMU_REPO:-https://github.com/kiri225/temu_api.git}"
 INSTALL_DIR="${INSTALL_DIR:-/opt/temu-api}"
 DATA_DIR="${DATA_DIR:-/opt/temu-api-data}"
 BRANCH="${BRANCH:-master}"
-PLAYGROUND_PORT="${PLAYGROUND_PORT:-8080}"
+PLAYGROUND_PORT="${PLAYGROUND_PORT:-27789}"
 GIT_CLONE_TIMEOUT="${GIT_CLONE_TIMEOUT:-120}"
 
 need_cmd() {
@@ -73,7 +73,9 @@ if [[ -d "$INSTALL_DIR/.git" ]]; then
     echo ">> git 更新失败或超时，使用当前代码继续部署" >&2
   fi
 elif [[ -f "$INSTALL_DIR/docker-compose.yml" ]]; then
-  echo ">> 使用已有代码: $INSTALL_DIR (跳过克隆)"
+  echo ">> 使用已有代码: $INSTALL_DIR (非 git 仓库，无法 git pull)" >&2
+  echo ">> 请在本机执行: .\\remote-deploy.ps1 -Server user@服务器" >&2
+  echo ">> 或先在服务器 git clone 后再用 server-deploy.sh 更新" >&2
 else
   if clone_repo; then
     :
@@ -138,8 +140,23 @@ export TEMU_SAMPLES_PATH="$DATA_DIR/api-samples.json"
 export PLAYGROUND_PORT
 
 cd "$INSTALL_DIR"
+
+BUILD_VERSION="${BUILD_VERSION:-$(date -u +%Y%m%d-%H%M%S)}"
+BUILD_TIME="${BUILD_TIME:-$(date -u +%Y-%m-%dT%H:%M:%SZ)}"
+export BUILD_VERSION BUILD_TIME
+
+echo ">> 构建版本: ${BUILD_VERSION} (${BUILD_TIME})"
 echo ">> 构建并启动容器..."
-docker compose up -d --build
+if [[ "${FORCE_REBUILD:-}" == "1" ]]; then
+  docker compose build --no-cache --build-arg BUILD_VERSION="$BUILD_VERSION" --build-arg BUILD_TIME="$BUILD_TIME"
+  docker compose up -d --force-recreate
+else
+  docker compose build --build-arg BUILD_VERSION="$BUILD_VERSION" --build-arg BUILD_TIME="$BUILD_TIME"
+  docker compose up -d --build
+fi
+
+echo ""
+echo "验证: curl -s http://127.0.0.1:${PLAYGROUND_PORT}/health"
 
 host_ip="$(hostname -I 2>/dev/null | awk '{print $1}')"
 host_ip="${host_ip:-localhost}"

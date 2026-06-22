@@ -1,10 +1,14 @@
 services:
   temu-playground:
-    build: .
+    build:
+      context: .
+      args:
+        BUILD_VERSION: ${BUILD_VERSION:-dev}
+        BUILD_TIME: ${BUILD_TIME:-unknown}
     image: temu-go-playground:latest
     container_name: temu-playground
     ports:
-      - "${PLAYGROUND_PORT:-8080}:8080"
+      - "${PLAYGROUND_PORT:-27789}:8080"
     volumes:
       - ${TEMU_CONFIG_PATH:-./config/config.json}:/config/config.json:ro
       - ${TEMU_UNAVAILABLE_PATH:-./cmd/playground/unavailable.json}:/data/unavailable.json

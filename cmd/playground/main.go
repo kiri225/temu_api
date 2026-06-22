@@ -113,8 +113,11 @@ func handleHealth(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write([]byte("ok"))
+	writeJSON(w, http.StatusOK, map[string]string{
+		"status":  "ok",
+		"version": buildVersion,
+		"built":   buildTime,
+	})
 }
 
 func maskSecret(s string) string {

@@ -4,7 +4,7 @@ param(
 
     [string]$InstallDir = "/opt/temu-api",
     [string]$DataDir = "/opt/temu-api-data",
-    [string]$Port = "8080"
+    [string]$Port = "27789"
 )
 
 $ErrorActionPreference = "Stop"
@@ -22,6 +22,10 @@ if (Test-Path "cmd\playground\unavailable.json") {
     scp cmd\playground\unavailable.json "${Server}:${DataDir}/unavailable.json"
 }
 
+if (Test-Path "cmd\playground\api-samples.json") {
+    scp cmd\playground\api-samples.json "${Server}:${DataDir}/api-samples.json"
+}
+
 Write-Host ">> 同步代码到服务器（绕过 GitHub 直连）..." -ForegroundColor Cyan
 ssh $Server "mkdir -p $InstallDir"
 git archive --format=tar HEAD | ssh $Server "tar -x -C $InstallDir"
@@ -32,6 +36,8 @@ set -e
 export INSTALL_DIR='$InstallDir'
 export DATA_DIR='$DataDir'
 export PLAYGROUND_PORT='$Port'
+export SKIP_GIT_UPDATE=1
+export FORCE_REBUILD=1
 bash `$INSTALL_DIR/server-deploy.sh
 "@
 

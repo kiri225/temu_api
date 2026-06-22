@@ -14,7 +14,11 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w" -o /out/playground ./cmd/playground
+ARG BUILD_VERSION=dev
+ARG BUILD_TIME=unknown
+RUN CGO_ENABLED=0 GOOS=linux go build -trimpath \
+    -ldflags="-s -w -X main.buildVersion=${BUILD_VERSION} -X main.buildTime=${BUILD_TIME}" \
+    -o /out/playground ./cmd/playground
 
 FROM alpine:3.20
 

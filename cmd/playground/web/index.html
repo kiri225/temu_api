@@ -7,57 +7,72 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h1>Temu API Playground</h1>
-    <div class="header-actions">
+  <header class="topbar">
+    <div class="topbar-brand">
+      <h1>Temu API Playground</h1>
       <div id="config-badge" class="config-badge">加载配置中...</div>
-      <button id="logout-btn" class="btn-secondary btn-logout" type="button" hidden>退出登录</button>
     </div>
+    <button id="logout-btn" class="btn-secondary btn-sm btn-logout" type="button" hidden>退出登录</button>
   </header>
 
   <div class="layout">
     <aside class="sidebar">
-      <div class="search-box">
-        <input type="search" id="search" placeholder="搜索接口...">
+      <div class="sidebar-head">
+        <span class="sidebar-title">接口导航</span>
+        <input type="search" id="search" class="search-input" placeholder="搜索名称 / type…">
       </div>
-      <nav id="api-list"></nav>
+      <nav id="api-list" class="api-nav"></nav>
     </aside>
 
     <main class="workspace">
-      <section class="panel">
+      <section class="api-bar">
         <div id="api-desc" class="api-desc"></div>
 
-        <div class="mark-panel">
-          <div class="mark-panel-row">
-            <input
-              type="text"
-              id="unavailable-note"
-              class="mark-note-input"
-              placeholder="不可用备注（可选，如：缺参数 / 网关不对）"
-            >
-            <button
-              id="mark-unavailable-btn"
-              class="btn-secondary btn-mark-unavailable"
-              type="button"
-              title="标记后写入 unavailable.json，重启后仍保留"
-            >
-              标记不可用
-            </button>
+        <div class="api-bar-main">
+          <div class="api-type-wrap">
+            <label for="api-type">API Type</label>
+            <input type="text" id="api-type" placeholder="例如 bg.mall.info.get" spellcheck="false">
           </div>
-          <p class="mark-hint">在左侧列表点击 ★ 也可快速标记；标记会保存到 <code>cmd/playground/unavailable.json</code></p>
+          <div class="api-bar-actions">
+            <button id="send-btn" class="btn-primary" type="button">发送请求</button>
+            <button id="format-btn" class="btn-secondary btn-sm" type="button">格式化</button>
+            <button id="clear-btn" class="btn-secondary btn-sm" type="button">清空</button>
+          </div>
         </div>
 
-        <div class="samples-panel">
-          <div class="samples-panel-header">
-            <h3>测试示例与参数备注</h3>
-            <div class="samples-actions">
-              <button id="refresh-params-btn" class="btn-secondary" type="button">从 Body 刷新参数表</button>
-              <button id="save-sample-btn" class="btn-primary" type="button">保存示例</button>
-              <button id="reset-sample-btn" class="btn-secondary" type="button">恢复内置默认</button>
+        <details class="tools-drawer">
+          <summary>示例保存 · 不可用标记</summary>
+          <div class="tools-drawer-body">
+            <div class="tools-group">
+              <span class="tools-label">测试示例</span>
+              <button id="refresh-params-btn" class="btn-secondary btn-sm" type="button">从 Body 刷新参数表</button>
+              <button id="save-sample-btn" class="btn-primary btn-sm" type="button">保存示例</button>
+              <button id="reset-sample-btn" class="btn-secondary btn-sm" type="button">恢复默认</button>
             </div>
+            <div class="tools-group">
+              <span class="tools-label">不可用</span>
+              <input
+                type="text"
+                id="unavailable-note"
+                class="mark-note-input"
+                placeholder="备注（可选）"
+              >
+              <button id="mark-unavailable-btn" class="btn-secondary btn-sm btn-mark-unavailable" type="button">
+                标记不可用
+              </button>
+            </div>
+            <p class="tools-hint">示例与备注写入 <code>api-samples.json</code>；不可用标记写入 <code>unavailable.json</code>，重启后保留。</p>
+            <div id="sample-save-status" class="sample-save-status" hidden></div>
           </div>
-          <p class="mark-hint">示例与备注保存到 <code>cmd/playground/api-samples.json</code>，重启后仍保留；可编辑 Body 与下方备注后点「保存示例」。</p>
-          <div id="sample-save-status" class="sample-save-status" hidden></div>
+        </details>
+      </section>
+
+      <div class="workspace-split">
+        <section class="panel panel-notes">
+          <header class="panel-head">
+            <h2>字段备注</h2>
+            <span class="panel-sub">根据 Body 自动生成，可编辑说明</span>
+          </header>
           <div class="param-notes-wrap">
             <table class="param-notes-table">
               <thead>
@@ -70,31 +85,30 @@
                 </tr>
               </thead>
               <tbody id="param-notes-body">
-                <tr><td colspan="5" class="empty-hint">选择接口或填写 Body 后点击「从 Body 刷新参数表」</td></tr>
+                <tr><td colspan="5" class="empty-hint">选择接口后自动加载；也可编辑 Body 后刷新</td></tr>
               </tbody>
             </table>
           </div>
-        </div>
+        </section>
 
-        <label for="api-type">API Type</label>
-        <input type="text" id="api-type" placeholder="例如 bg.mall.info.get">
+        <section class="panel panel-request">
+          <header class="panel-head">
+            <h2>请求 Body</h2>
+            <span class="panel-sub">JSON · Ctrl+Enter 发送</span>
+          </header>
+          <textarea id="request-body" spellcheck="false" placeholder="{}"></textarea>
+        </section>
+      </div>
 
-        <label for="request-body">请求 Body (JSON)</label>
-        <textarea id="request-body" rows="12" spellcheck="false"></textarea>
-
-        <div class="actions">
-          <button id="send-btn" class="btn-primary">发送请求</button>
-          <button id="format-btn" class="btn-secondary">格式化 JSON</button>
-          <button id="clear-btn" class="btn-secondary">清空</button>
-        </div>
-      </section>
-
-      <section class="panel response-panel">
-        <div class="response-header">
-          <h2>响应结果</h2>
+      <section class="panel panel-response">
+        <header class="panel-head panel-head-row">
+          <div>
+            <h2>响应结果</h2>
+            <span class="panel-sub">最近一次请求</span>
+          </div>
           <span id="meta" class="meta"></span>
-        </div>
-        <pre id="response" class="response">等待请求...</pre>
+        </header>
+        <pre id="response" class="response">等待请求…</pre>
       </section>
     </main>
   </div>
