@@ -494,19 +494,53 @@ body {
   z-index: 1;
 }
 
-.param-notes-table .col-expand { width: 30px; }
-.param-notes-table .col-path { width: 26%; font-family: var(--font-mono); }
+
+.param-notes-table .col-path { width: 34%; font-family: var(--font-mono); }
 .param-notes-table .col-type { width: 64px; color: var(--text-muted); }
 .param-notes-table .col-preview {
-  width: 20%;
+  width: 18%;
   font-family: var(--font-mono);
   color: var(--text-muted);
   word-break: break-all;
 }
 
+.param-path-cell {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.param-tree-guides {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.param-tree-notch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  color: var(--primary);
+  opacity: 0.45;
+  font-size: 12px;
+  line-height: 1;
+  user-select: none;
+}
+
+.param-row--branch .param-segment {
+  font-weight: 500;
+}
+
+.param-row[data-depth="0"] .param-tree-notch {
+  display: none;
+}
+
 .param-expand-btn {
-  width: 22px;
-  height: 22px;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
   padding: 0;
   border: none;
   border-radius: 4px;
@@ -514,6 +548,12 @@ body {
   color: var(--text-muted);
   cursor: pointer;
   font-size: 9px;
+  line-height: 1;
+}
+
+.param-expand-btn.is-expanded {
+  color: var(--primary);
+  background: rgba(91, 141, 239, 0.15);
 }
 
 .param-expand-btn:hover {
@@ -523,7 +563,14 @@ body {
 
 .param-expand-placeholder {
   display: inline-block;
-  width: 22px;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.param-segment {
+  min-width: 0;
+  word-break: break-all;
 }
 
 .param-note-input {

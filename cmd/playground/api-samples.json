@@ -6,12 +6,19 @@
         "imageBizType": "0=普通商品图；1=外包装图（发品 productOuterPackageImage 用）",
         "options": {
           "boost": "是否 AI 清晰度提升",
-          "doIntelligenceCrop": "是否 AI 智能裁剪（true 返回 1 原图 + 3 裁剪图）",
           "cateId": "叶子类目 ID，doIntelligenceCrop=true 时生效",
+          "doIntelligenceCrop": "是否 AI 智能裁剪（true 返回 1 原图 + 3 裁剪图）",
           "sizeMode": "0 原图；1 800×800(1:1)；2 1350×1800(3:4)"
         }
       }
+    },
+    "goods-migrate": {
+      "body": {}
     }
   },
-  "byType": {}
+  "byType": {
+    "temu.goods.migrate": {
+      "body": {}
+    }
+  }
 }

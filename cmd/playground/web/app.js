@@ -145,15 +145,34 @@ function pruneEmptyNotes(obj) {
   return out;
 }
 
+function pathSegment(path) {
+  const m = path.match(/(\[[0-9]+\]|[^.[\]]+)$/);
+  return m ? m[1] : path;
+}
+
+function parentPath(path) {
+  if (!path) return "";
+  const m = path.match(/^(.*)(?:\.[^.[\]]+|\[[0-9]+\])$/);
+  return m ? m[1] : "";
+}
+
+function hasChildNodes(value) {
+  const t = valueType(value);
+  if (t === "array") return Array.isArray(value) && value.length > 0;
+  if (t === "object" && value !== null) return Object.keys(value).length > 0;
+  return false;
+}
+
 function collectParamRows(value, path, depth, rows) {
   const t = valueType(value);
+  const hasChildren = hasChildNodes(value);
   rows.push({
     path,
-    key: path.split(".").pop(),
+    segment: pathSegment(path),
     type: t,
     preview: previewValue(value),
     depth,
-    expandable: t === "object" && value !== null && !Array.isArray(value),
+    hasChildren,
   });
 
   if (t === "object" && value !== null && !Array.isArray(value)) {
@@ -161,7 +180,7 @@ function collectParamRows(value, path, depth, rows) {
       const childPath = path ? `${path}.${key}` : key;
       collectParamRows(value[key], childPath, depth + 1, rows);
     }
-  } else if (Array.isArray(value)) {
+  } else if (t === "array") {
     value.forEach((item, idx) => {
       collectParamRows(item, `${path}[${idx}]`, depth + 1, rows);
     });
@@ -169,69 +188,116 @@ function collectParamRows(value, path, depth, rows) {
 }
 
 function isPathVisible(path) {
-  if (!path.includes(".") && !path.includes("[")) return true;
-  const parent = path.replace(/(\[[0-9]+\]|\.[^.[\]]+)$/, "");
-  if (!parent || parent === path) return true;
+  const parent = parentPath(path);
+  if (!parent) return true;
   if (collapsedParamPaths.has(parent)) return false;
   return isPathVisible(parent);
 }
 
-function renderParamNotesTable() {
-  const tbody = $("#param-notes-body");
-  if (!tbody) return;
-
-  const bodyText = $("#request-body").value.trim();
-  if (!bodyText) {
-    tbody.innerHTML = '<tr><td colspan="5" class="empty-hint">请先填写请求 Body</td></tr>';
-    return;
-  }
-
-  let parsed;
-  try {
-    parsed = JSON.parse(bodyText);
-  } catch {
-    tbody.innerHTML = '<tr><td colspan="5" class="empty-hint">Body 不是合法 JSON，无法生成参数表</td></tr>';
-    return;
-  }
-
-  if (parsed === null || typeof parsed !== "object") {
-    tbody.innerHTML = '<tr><td colspan="5" class="empty-hint">Body 需为 JSON 对象才能展开参数</td></tr>';
-    return;
-  }
-
+function buildParamRows(parsed) {
   const rows = [];
   for (const key of Object.keys(parsed)) {
     collectParamRows(parsed[key], key, 0, rows);
   }
+  return rows;
+}
+
+function applyDefaultCollapse(rows) {
+  collapsedParamPaths.clear();
+  for (const row of rows) {
+    if (row.hasChildren && row.depth >= 1) {
+      collapsedParamPaths.add(row.path);
+    }
+  }
+}
+
+function parseRequestBodyObject(bodyText) {
+  if (!bodyText) return { error: "请先填写请求 Body" };
+  try {
+    const parsed = JSON.parse(bodyText);
+    if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return { error: "Body 需为 JSON 对象才能展开参数" };
+    }
+    return { parsed };
+  } catch {
+    return { error: "Body 不是合法 JSON，无法生成参数表" };
+  }
+}
+
+function createTreeGuides(depth) {
+  const guides = document.createElement("span");
+  guides.className = "param-tree-guides";
+  guides.setAttribute("aria-hidden", "true");
+  for (let i = 0; i < depth; i++) {
+    const notch = document.createElement("span");
+    notch.className = "param-tree-notch";
+    notch.textContent = "›";
+    guides.appendChild(notch);
+  }
+  return guides;
+}
+
+function createExpandControl(row) {
+  if (!row.hasChildren) {
+    const spacer = document.createElement("span");
+    spacer.className = "param-expand-placeholder";
+    return spacer;
+  }
+  const expanded = !collapsedParamPaths.has(row.path);
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "param-expand-btn" + (expanded ? " is-expanded" : "");
+  btn.textContent = expanded ? "▼" : "▶";
+  btn.title = expanded ? "收起子参数" : "展开子参数";
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (collapsedParamPaths.has(row.path)) collapsedParamPaths.delete(row.path);
+    else collapsedParamPaths.add(row.path);
+    renderParamNotesTable(false);
+  });
+  return btn;
+}
+
+function renderParamNotesTable(resetCollapse = true) {
+  const tbody = $("#param-notes-body");
+  if (!tbody) return;
+
+  const bodyText = $("#request-body").value.trim();
+  const { parsed, error } = parseRequestBodyObject(bodyText);
+  if (error) {
+    tbody.innerHTML = `<tr><td colspan="4" class="empty-hint">${error}</td></tr>`;
+    return;
+  }
+
+  const rows = buildParamRows(parsed);
+  if (resetCollapse) applyDefaultCollapse(rows);
 
   tbody.innerHTML = "";
   for (const row of rows) {
     if (!isPathVisible(row.path)) continue;
 
     const tr = document.createElement("tr");
-
-    const expandTd = document.createElement("td");
-    if (row.expandable) {
-      const expanded = !collapsedParamPaths.has(row.path);
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "param-expand-btn";
-      btn.textContent = expanded ? "▼" : "▶";
-      btn.title = expanded ? "收起子参数" : "展开子参数";
-      btn.addEventListener("click", () => {
-        if (collapsedParamPaths.has(row.path)) collapsedParamPaths.delete(row.path);
-        else collapsedParamPaths.add(row.path);
-        renderParamNotesTable();
-      });
-      expandTd.appendChild(btn);
-    } else {
-      expandTd.innerHTML = '<span class="param-expand-placeholder"></span>';
-    }
+    tr.className = "param-row";
+    tr.dataset.depth = String(row.depth);
+    if (row.hasChildren) tr.classList.add("param-row--branch");
+    if (collapsedParamPaths.has(row.path)) tr.classList.add("param-row--collapsed");
 
     const pathTd = document.createElement("td");
     pathTd.className = "col-path";
-    pathTd.style.paddingLeft = `${10 + row.depth * 14}px`;
-    pathTd.textContent = row.key;
+
+    const cell = document.createElement("div");
+    cell.className = "param-path-cell";
+
+    cell.appendChild(createTreeGuides(row.depth));
+    cell.appendChild(createExpandControl(row));
+
+    const segment = document.createElement("span");
+    segment.className = "param-segment";
+    segment.textContent = row.segment;
+    segment.title = row.path;
+    cell.appendChild(segment);
+
+    pathTd.appendChild(cell);
 
     const typeTd = document.createElement("td");
     typeTd.className = "col-type";
@@ -253,7 +319,6 @@ function renderParamNotesTable() {
     });
     noteTd.appendChild(input);
 
-    tr.appendChild(expandTd);
     tr.appendChild(pathTd);
     tr.appendChild(typeTd);
     tr.appendChild(previewTd);
@@ -478,13 +543,12 @@ function selectApi(api) {
     noteInput.value = isApiUnavailable(api) ? unavailableNote(api) : "";
   }
   paramNotes = api.paramNotes ? JSON.parse(JSON.stringify(api.paramNotes)) : {};
-  collapsedParamPaths.clear();
   try {
     $("#request-body").value = JSON.stringify(JSON.parse(api.sampleBody), null, 2);
   } catch {
     $("#request-body").value = api.sampleBody || "{}";
   }
-  renderParamNotesTable();
+  renderParamNotesTable(true);
   renderCatalog(filterCatalog($("#search").value));
   updateMarkUnavailableButton();
 }
@@ -614,13 +678,13 @@ $("#clear-btn").addEventListener("click", () => {
   activeId = null;
   paramNotes = {};
   collapsedParamPaths.clear();
-  renderParamNotesTable();
+  renderParamNotesTable(true);
   const noteInput = $("#unavailable-note");
   if (noteInput) noteInput.value = "";
   updateMarkUnavailableButton();
 });
 $("#save-sample-btn").addEventListener("click", saveSample);
-$("#refresh-params-btn").addEventListener("click", renderParamNotesTable);
+$("#refresh-params-btn").addEventListener("click", () => renderParamNotesTable(true));
 $("#reset-sample-btn").addEventListener("click", resetSample);
 $("#mark-unavailable-btn").addEventListener("click", toggleUnavailableMark);
 $("#logout-btn").addEventListener("click", logout);
