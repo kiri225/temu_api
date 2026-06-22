@@ -41,7 +41,7 @@ var apiCatalog = []apiEntry{
 	{ID: "mall-address-add", Category: "店铺", Name: "新增发货地址", Type: "bg.mall.address.add", Description: "新增店铺发货地址（含四级街道 townCode）", SampleBody: mallAddressAddSample},
 
 	// ── 商品管理 ──
-	{ID: "goods-list", Category: "商品管理", Name: "商品列表", Type: "temu.goods.list.get", Description: "分页查询商品列表（Partner 网关）", SampleBody: `{"page": 1, "pageSize": 10}`},
+	{ID: "goods-list", Category: "商品管理", Name: "商品列表", Type: "temu.goods.list.get", Description: "分页查询商品列表（Partner 网关）", SampleBody: `{"pageNo": 1, "pageSize": 10}`},
 	{ID: "goods-detail", Category: "商品管理", Name: "商品详情", Type: "temu.goods.detail.get", Description: "根据 productId 查询商品详情", SampleBody: `{"productId": 141911679}`},
 	{ID: "goods-add", Category: "商品管理", Name: "创建商品", Type: "temu.goods.add", Description: "创建新商品（全托样例）", SampleBody: goodsAddFullSample},
 	{ID: "goods-update", Category: "商品管理", Name: "更新商品", Type: "temu.goods.update", Description: "更新商品信息", SampleBody: `{}`},
@@ -50,7 +50,7 @@ var apiCatalog = []apiEntry{
 	{ID: "goods-edit-property", Category: "商品管理", Name: "编辑商品属性", Type: "temu.goods.edit.property", Description: "编辑商品属性", SampleBody: `{}`},
 	{ID: "goods-image-upload", Category: "商品管理", Name: "上传商品图片", Type: "bg.goods.image.upload.global", Description: "上传商品图片", SampleBody: `{}`},
 	{ID: "goods-sales", Category: "商品管理", Name: "商品销量", Type: "bg.goods.sales.get", Description: "查询商品销量（CN 网关）", SampleBody: `{"productSkcIds": [7469668867]}`},
-	{ID: "goods-life-search", Category: "商品管理", Name: "商品生命周期搜索", Type: "bg.glo.product.search", Description: "搜索商品生命周期", SampleBody: `{"page": 1, "pageSize": 10}`},
+	{ID: "goods-life-search", Category: "商品管理", Name: "商品生命周期搜索", Type: "bg.glo.product.search", Description: "搜索商品生命周期", SampleBody: `{"pageNo": 1, "pageSize": 10}`},
 	{ID: "goods-topselling", Category: "商品管理", Name: "爆款售罄", Type: "temu.goods.topselling.soldout.get", Description: "查询爆款售罄商品", SampleBody: `{}`},
 	{ID: "goods-label", Category: "商品管理", Name: "商品标签", Type: "temu.goods.labelv2.get", Description: "查询商品标签/条码", SampleBody: `{"productSkcId": 7469668867}`},
 	{ID: "goods-custom-label", Category: "商品管理", Name: "定制品标签", Type: "temu.goods.custom.label.get", Description: "查询定制品标签", SampleBody: `{}`},
@@ -75,24 +75,24 @@ var apiCatalog = []apiEntry{
 
 	// ── 商品价格 ──
 	{ID: "goods-price-list", Category: "商品价格", Name: "价格列表", Type: "temu.goods.price.list.get", Description: "查询商品价格列表", SampleBody: `{}`},
-	{ID: "goods-price-adjust-query", Category: "商品价格", Name: "调价单查询", Type: "bg.full.adjust.price.page.query", Description: "分页查询调价单", SampleBody: `{"page": 1, "pageSize": 10}`},
+	{ID: "goods-price-adjust-query", Category: "商品价格", Name: "调价单查询", Type: "bg.full.adjust.price.page.query", Description: "分页查询调价单", SampleBody: `{"pageNo": 1, "pageSize": 10}`},
 	{ID: "goods-price-adjust-review", Category: "商品价格", Name: "批量审核调价", Type: "bg.full.adjust.price.batch.review", Description: "批量审核调价单", SampleBody: `{}`},
-	{ID: "goods-price-review-query", Category: "商品价格", Name: "半托核价查询", Type: "bg.semi.price.review.page.query.order", Description: "半托管核价单查询", SampleBody: `{"page": 1, "pageSize": 10}`},
+	{ID: "goods-price-review-query", Category: "商品价格", Name: "半托核价查询", Type: "bg.semi.price.review.page.query.order", Description: "半托管核价单查询", SampleBody: `{"pageNo": 1, "pageSize": 10}`},
 	{ID: "goods-price-review-confirm", Category: "商品价格", Name: "半托核价确认", Type: "bg.semi.price.review.confirm.order", Description: "确认半托管核价", SampleBody: `{}`},
 	{ID: "goods-price-review-reject", Category: "商品价格", Name: "半托核价拒绝", Type: "bg.semi.price.review.reject.order", Description: "拒绝半托管核价", SampleBody: `{}`},
 
 	// ── 备货单 ──
-	{ID: "purchase-query", Category: "备货单", Name: "备货单查询", Type: "bg.purchaseorderv2.get", Description: "分页查询备货单列表", SampleBody: `{"page": 1, "pageSize": 10}`},
+	{ID: "purchase-query", Category: "备货单", Name: "备货单查询", Type: "bg.purchaseorderv2.get", Description: "分页查询备货单列表", SampleBody: `{"pageNo": 1, "pageSize": 10}`},
 	{ID: "purchase-apply", Category: "备货单", Name: "申请备货", Type: "bg.purchaseorder.apply", Description: "申请备货单", SampleBody: `{}`},
 	{ID: "purchase-edit", Category: "备货单", Name: "编辑备货单", Type: "bg.purchaseorder.edit", Description: "编辑备货单", SampleBody: `{}`},
 	{ID: "purchase-cancel", Category: "备货单", Name: "取消备货单", Type: "bg.purchaseorder.cancel", Description: "取消备货单", SampleBody: `{}`},
 
 	// ── 发货台 ──
-	{ID: "ship-staging-query", Category: "发货台", Name: "发货台查询", Type: "bg.shiporder.staging.get", Description: "查询发货台数据", SampleBody: `{"page": 1, "pageSize": 10}`},
+	{ID: "ship-staging-query", Category: "发货台", Name: "发货台查询", Type: "bg.shiporder.staging.get", Description: "查询发货台数据", SampleBody: `{"pageNo": 1, "pageSize": 10}`},
 	{ID: "ship-staging-add", Category: "发货台", Name: "加入发货台", Type: "bg.shiporder.staging.add", Description: "将备货单加入发货台", SampleBody: `{}`},
 
 	// ── 发货单 ──
-	{ID: "ship-order-query", Category: "发货单", Name: "发货单查询", Type: "bg.shiporderv2.get", Description: "分页查询发货单", SampleBody: `{"page": 1, "pageSize": 10}`},
+	{ID: "ship-order-query", Category: "发货单", Name: "发货单查询", Type: "bg.shiporderv2.get", Description: "分页查询发货单", SampleBody: `{"pageNo": 1, "pageSize": 10}`},
 	{ID: "ship-order-create", Category: "发货单", Name: "创建发货单", Type: "bg.shiporderv3.create", Description: "创建发货单 V3", SampleBody: `{}`},
 	{ID: "ship-order-cancel", Category: "发货单", Name: "取消发货单", Type: "bg.shiporder.cancel", Description: "取消发货单", SampleBody: `{}`},
 	{ID: "ship-order-logistics-get", Category: "发货单", Name: "发货单物流", Type: "bg.shiporder.logistics.get", Description: "查询发货单物流信息", SampleBody: `{}`},

@@ -14,7 +14,6 @@ type goodsBrandService service
 
 type GoodsBrandQueryParams struct {
 	normal.ParameterWithPager
-	Page      int    `json:"page"`                // 页码
 	Vid       int64  `json:"vid,omitempty"`       // 搜索的属性 ID
 	BrandName string `json:"BrandName,omitempty"` // 搜索的品牌名称
 }
@@ -26,8 +25,7 @@ func (m GoodsBrandQueryParams) validate() error {
 // Query 查询可绑定的品牌接口
 // https://seller.kuajingmaihuo.com/sop/view/750197804480663142#PjxWnZ
 func (s goodsBrandService) Query(ctx context.Context, params GoodsBrandQueryParams) (items []entity.GoodsBrand, total, totalPages int, isLastPage bool, err error) {
-	params.Page = params.TidyPager().Page
-	params.OmitPage()
+	params.TidyPager()
 	if err = params.validate(); err != nil {
 		return items, 0, 0, true, invalidInput(err)
 	}

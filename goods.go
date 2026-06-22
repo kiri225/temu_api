@@ -39,7 +39,6 @@ type goodsService struct {
 
 type GoodsQueryParams struct {
 	normal.ParameterWithPager
-	Page                   int       `json:"page"`                             // 页码
 	Cat1Id                 int64     `json:"cat1Id,omitempty"`                 // 一级分类 ID
 	Cat2Id                 int64     `json:"cat2Id,omitempty"`                 // 二级分类 ID
 	Cat3Id                 int64     `json:"cat3Id,omitempty"`                 // 三级分类 ID
@@ -93,8 +92,7 @@ func (m GoodsQueryParams) validate() error {
 // Query 货品列表查询
 // https://seller.kuajingmaihuo.com/sop/view/750197804480663142#SjadVR
 func (s goodsService) Query(ctx context.Context, params GoodsQueryParams) (items []entity.Goods, total, totalPages int, isLastPage bool, err error) {
-	params.Page = params.TidyPager().Page
-	params.OmitPage()
+	params.TidyPager()
 	if err = params.validate(); err != nil {
 		err = invalidInput(err)
 		return
