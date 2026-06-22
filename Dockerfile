@@ -25,6 +25,7 @@ WORKDIR /app
 
 COPY --from=builder /out/playground ./playground
 COPY cmd/playground/unavailable.json ./data/unavailable.json
+COPY cmd/playground/api-samples.json ./data/api-samples.json
 
 RUN chown -R app:app /app
 
@@ -33,4 +34,4 @@ USER app
 EXPOSE 8080
 
 ENTRYPOINT ["./playground"]
-CMD ["-port", "8080", "-config", "/config/config.json", "-unavailable", "/data/unavailable.json"]
+CMD ["-port", "8080", "-config", "/config/config.json", "-unavailable", "/data/unavailable.json", "-samples", "/data/api-samples.json"]

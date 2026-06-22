@@ -109,10 +109,20 @@ if [[ ! -f "$DATA_DIR/unavailable.json" ]]; then
   fi
 fi
 
+if [[ ! -f "$DATA_DIR/api-samples.json" ]]; then
+  if [[ -f "$INSTALL_DIR/cmd/playground/api-samples.json" ]]; then
+    cp "$INSTALL_DIR/cmd/playground/api-samples.json" "$DATA_DIR/api-samples.json"
+  else
+    echo '{"byId":{},"byType":{}}' > "$DATA_DIR/api-samples.json"
+  fi
+fi
+
 # 容器内以非 root 用户 (uid 65532) 运行
 chmod 644 "$DATA_DIR/config/config.json"
 chown 65532:65532 "$DATA_DIR/unavailable.json"
 chmod 644 "$DATA_DIR/unavailable.json"
+chown 65532:65532 "$DATA_DIR/api-samples.json"
+chmod 644 "$DATA_DIR/api-samples.json"
 
 if [[ -f "$DATA_DIR/playground.env" ]]; then
   echo ">> 加载登录配置: $DATA_DIR/playground.env"
@@ -124,6 +134,7 @@ fi
 
 export TEMU_CONFIG_PATH="$DATA_DIR/config/config.json"
 export TEMU_UNAVAILABLE_PATH="$DATA_DIR/unavailable.json"
+export TEMU_SAMPLES_PATH="$DATA_DIR/api-samples.json"
 export PLAYGROUND_PORT
 
 cd "$INSTALL_DIR"

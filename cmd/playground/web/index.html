@@ -47,6 +47,35 @@
           <p class="mark-hint">在左侧列表点击 ★ 也可快速标记；标记会保存到 <code>cmd/playground/unavailable.json</code></p>
         </div>
 
+        <div class="samples-panel">
+          <div class="samples-panel-header">
+            <h3>测试示例与参数备注</h3>
+            <div class="samples-actions">
+              <button id="refresh-params-btn" class="btn-secondary" type="button">从 Body 刷新参数表</button>
+              <button id="save-sample-btn" class="btn-primary" type="button">保存示例</button>
+              <button id="reset-sample-btn" class="btn-secondary" type="button">恢复内置默认</button>
+            </div>
+          </div>
+          <p class="mark-hint">示例与备注保存到 <code>cmd/playground/api-samples.json</code>，重启后仍保留；可编辑 Body 与下方备注后点「保存示例」。</p>
+          <div id="sample-save-status" class="sample-save-status" hidden></div>
+          <div class="param-notes-wrap">
+            <table class="param-notes-table">
+              <thead>
+                <tr>
+                  <th class="col-expand"></th>
+                  <th class="col-path">参数</th>
+                  <th class="col-type">类型</th>
+                  <th class="col-preview">示例值</th>
+                  <th class="col-note">备注</th>
+                </tr>
+              </thead>
+              <tbody id="param-notes-body">
+                <tr><td colspan="5" class="empty-hint">选择接口或填写 Body 后点击「从 Body 刷新参数表」</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <label for="api-type">API Type</label>
         <input type="text" id="api-type" placeholder="例如 bg.mall.info.get">
 

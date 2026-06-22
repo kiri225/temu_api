@@ -5,6 +5,8 @@ let categories = [];
 let unavailableState = { byId: {}, byType: {} };
 let activeId = null;
 const collapsed = new Set();
+let paramNotes = {};
+const collapsedParamPaths = new Set();
 
 async function apiFetch(url, options = {}) {
   const res = await fetch(url, options);
@@ -80,6 +82,269 @@ function unavailableNote(api) {
   const byType = unavailableState.byType?.[api.type]?.note;
   if (byType) return byType;
   return api.unavailableNote || "";
+}
+
+function valueType(v) {
+  if (v === null) return "null";
+  if (Array.isArray(v)) return "array";
+  return typeof v;
+}
+
+function previewValue(v) {
+  if (v === null) return "null";
+  if (typeof v === "string") {
+    if (v.length > 48) return v.slice(0, 45) + "...";
+    return v;
+  }
+  if (typeof v === "object") {
+    return Array.isArray(v) ? `[${v.length}]` : "{...}";
+  }
+  return String(v);
+}
+
+function getNoteAtPath(notes, path) {
+  if (!notes || !path) return "";
+  const parts = path.split(".");
+  let cur = notes;
+  for (const part of parts) {
+    if (cur == null || typeof cur !== "object") return "";
+    cur = cur[part];
+  }
+  return typeof cur === "string" ? cur : "";
+}
+
+function setNoteAtPath(notes, path, value) {
+  const parts = path.split(".");
+  let cur = notes;
+  for (let i = 0; i < parts.length - 1; i++) {
+    const p = parts[i];
+    if (cur[p] == null || typeof cur[p] !== "object" || Array.isArray(cur[p])) {
+      cur[p] = {};
+    }
+    cur = cur[p];
+  }
+  const last = parts[parts.length - 1];
+  if (!value.trim()) {
+    delete cur[last];
+  } else {
+    cur[last] = value.trim();
+  }
+}
+
+function pruneEmptyNotes(obj) {
+  if (!obj || typeof obj !== "object" || Array.isArray(obj)) return obj;
+  const out = {};
+  for (const [k, v] of Object.entries(obj)) {
+    if (typeof v === "string") {
+      if (v.trim()) out[k] = v.trim();
+    } else if (v && typeof v === "object") {
+      const child = pruneEmptyNotes(v);
+      if (child && Object.keys(child).length) out[k] = child;
+    }
+  }
+  return out;
+}
+
+function collectParamRows(value, path, depth, rows) {
+  const t = valueType(value);
+  rows.push({
+    path,
+    key: path.split(".").pop(),
+    type: t,
+    preview: previewValue(value),
+    depth,
+    expandable: t === "object" && value !== null && !Array.isArray(value),
+  });
+
+  if (t === "object" && value !== null && !Array.isArray(value)) {
+    for (const key of Object.keys(value)) {
+      const childPath = path ? `${path}.${key}` : key;
+      collectParamRows(value[key], childPath, depth + 1, rows);
+    }
+  } else if (Array.isArray(value)) {
+    value.forEach((item, idx) => {
+      collectParamRows(item, `${path}[${idx}]`, depth + 1, rows);
+    });
+  }
+}
+
+function isPathVisible(path) {
+  if (!path.includes(".") && !path.includes("[")) return true;
+  const parent = path.replace(/(\[[0-9]+\]|\.[^.[\]]+)$/, "");
+  if (!parent || parent === path) return true;
+  if (collapsedParamPaths.has(parent)) return false;
+  return isPathVisible(parent);
+}
+
+function renderParamNotesTable() {
+  const tbody = $("#param-notes-body");
+  if (!tbody) return;
+
+  const bodyText = $("#request-body").value.trim();
+  if (!bodyText) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-hint">请先填写请求 Body</td></tr>';
+    return;
+  }
+
+  let parsed;
+  try {
+    parsed = JSON.parse(bodyText);
+  } catch {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-hint">Body 不是合法 JSON，无法生成参数表</td></tr>';
+    return;
+  }
+
+  if (parsed === null || typeof parsed !== "object") {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-hint">Body 需为 JSON 对象才能展开参数</td></tr>';
+    return;
+  }
+
+  const rows = [];
+  for (const key of Object.keys(parsed)) {
+    collectParamRows(parsed[key], key, 0, rows);
+  }
+
+  tbody.innerHTML = "";
+  for (const row of rows) {
+    if (!isPathVisible(row.path)) continue;
+
+    const tr = document.createElement("tr");
+
+    const expandTd = document.createElement("td");
+    if (row.expandable) {
+      const expanded = !collapsedParamPaths.has(row.path);
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "param-expand-btn";
+      btn.textContent = expanded ? "▼" : "▶";
+      btn.title = expanded ? "收起子参数" : "展开子参数";
+      btn.addEventListener("click", () => {
+        if (collapsedParamPaths.has(row.path)) collapsedParamPaths.delete(row.path);
+        else collapsedParamPaths.add(row.path);
+        renderParamNotesTable();
+      });
+      expandTd.appendChild(btn);
+    } else {
+      expandTd.innerHTML = '<span class="param-expand-placeholder"></span>';
+    }
+
+    const pathTd = document.createElement("td");
+    pathTd.className = "col-path";
+    pathTd.style.paddingLeft = `${10 + row.depth * 14}px`;
+    pathTd.textContent = row.key;
+
+    const typeTd = document.createElement("td");
+    typeTd.className = "col-type";
+    typeTd.textContent = row.type;
+
+    const previewTd = document.createElement("td");
+    previewTd.className = "col-preview";
+    previewTd.textContent = row.preview;
+
+    const noteTd = document.createElement("td");
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "param-note-input";
+    input.placeholder = "填写参数说明…";
+    input.value = getNoteAtPath(paramNotes, row.path);
+    input.dataset.path = row.path;
+    input.addEventListener("input", (e) => {
+      setNoteAtPath(paramNotes, e.target.dataset.path, e.target.value);
+    });
+    noteTd.appendChild(input);
+
+    tr.appendChild(expandTd);
+    tr.appendChild(pathTd);
+    tr.appendChild(typeTd);
+    tr.appendChild(previewTd);
+    tr.appendChild(noteTd);
+    tbody.appendChild(tr);
+  }
+}
+
+function showSampleStatus(message, ok) {
+  const el = $("#sample-save-status");
+  if (!el) return;
+  el.hidden = false;
+  el.textContent = message;
+  el.className = "sample-save-status " + (ok ? "ok" : "error");
+  if (ok) {
+    setTimeout(() => {
+      el.hidden = true;
+    }, 3000);
+  }
+}
+
+async function saveSample() {
+  const { api, type } = currentApiContext();
+  if (!type) {
+    alert("请填写 API Type 或选择接口");
+    return false;
+  }
+
+  const bodyText = $("#request-body").value.trim();
+  let body = {};
+  if (bodyText) {
+    try {
+      body = JSON.parse(bodyText);
+    } catch {
+      alert("请求 Body 不是合法的 JSON");
+      return false;
+    }
+  }
+
+  const res = await apiFetch("/api/samples", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      id: api?.id || "",
+      type,
+      body,
+      paramNotes: pruneEmptyNotes(paramNotes),
+    }),
+  });
+  const data = await res.json();
+  if (!res.ok || data.error) {
+    showSampleStatus(data.error || "保存失败", false);
+    return false;
+  }
+  if (data.apis) {
+    catalog = data.apis;
+    renderCatalog(filterCatalog($("#search").value));
+  }
+  showSampleStatus("已保存到 api-samples.json", true);
+  return true;
+}
+
+async function resetSample() {
+  const { api, type } = currentApiContext();
+  if (!type) {
+    alert("请填写 API Type 或选择接口");
+    return;
+  }
+  if (!confirm("确定恢复该接口的内置默认示例？将清除 api-samples.json 中的自定义 Body 与备注。")) {
+    return;
+  }
+
+  const res = await apiFetch("/api/samples", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      id: api?.id || "",
+      type,
+      clear: true,
+    }),
+  });
+  const data = await res.json();
+  if (!res.ok || data.error) {
+    showSampleStatus(data.error || "恢复失败", false);
+    return;
+  }
+  if (data.apis) catalog = data.apis;
+  await loadCatalog();
+  const fresh = api?.id ? catalog.find((a) => a.id === api.id) : catalog.find((a) => a.type === type);
+  if (fresh) selectApi(fresh);
+  showSampleStatus("已恢复内置默认", true);
 }
 
 async function saveUnavailableMark(api, type, unavailable, note) {
@@ -212,11 +477,14 @@ function selectApi(api) {
   if (noteInput) {
     noteInput.value = isApiUnavailable(api) ? unavailableNote(api) : "";
   }
+  paramNotes = api.paramNotes ? JSON.parse(JSON.stringify(api.paramNotes)) : {};
+  collapsedParamPaths.clear();
   try {
     $("#request-body").value = JSON.stringify(JSON.parse(api.sampleBody), null, 2);
   } catch {
     $("#request-body").value = api.sampleBody || "{}";
   }
+  renderParamNotesTable();
   renderCatalog(filterCatalog($("#search").value));
   updateMarkUnavailableButton();
 }
@@ -344,10 +612,16 @@ $("#clear-btn").addEventListener("click", () => {
   $("#meta").textContent = "";
   $("#api-desc").innerHTML = "";
   activeId = null;
+  paramNotes = {};
+  collapsedParamPaths.clear();
+  renderParamNotesTable();
   const noteInput = $("#unavailable-note");
   if (noteInput) noteInput.value = "";
   updateMarkUnavailableButton();
 });
+$("#save-sample-btn").addEventListener("click", saveSample);
+$("#refresh-params-btn").addEventListener("click", renderParamNotesTable);
+$("#reset-sample-btn").addEventListener("click", resetSample);
 $("#mark-unavailable-btn").addEventListener("click", toggleUnavailableMark);
 $("#logout-btn").addEventListener("click", logout);
 $("#api-type").addEventListener("input", updateMarkUnavailableButton);

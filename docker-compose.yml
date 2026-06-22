@@ -8,6 +8,7 @@ services:
     volumes:
       - ${TEMU_CONFIG_PATH:-./config/config.json}:/config/config.json:ro
       - ${TEMU_UNAVAILABLE_PATH:-./cmd/playground/unavailable.json}:/data/unavailable.json
+      - ${TEMU_SAMPLES_PATH:-./cmd/playground/api-samples.json}:/data/api-samples.json
     environment:
       TZ: ${TZ:-Asia/Shanghai}
       PLAYGROUND_AUTH_USER: ${PLAYGROUND_AUTH_USER:-}

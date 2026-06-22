@@ -6,9 +6,10 @@ type apiEntry struct {
 	Name        string `json:"name"`
 	Type        string `json:"type"`
 	Description string `json:"description"`
-	SampleBody        string `json:"sampleBody"`
-	Unavailable       bool   `json:"unavailable,omitempty"` // Playground 中无法正常调试使用
-	UnavailableNote   string `json:"unavailableNote,omitempty"`
+	SampleBody        string         `json:"sampleBody"`
+	ParamNotes        map[string]any `json:"paramNotes,omitempty"`
+	Unavailable       bool           `json:"unavailable,omitempty"` // Playground 中无法正常调试使用
+	UnavailableNote   string         `json:"unavailableNote,omitempty"`
 }
 
 // categoryOrder 左侧模块显示顺序
@@ -48,7 +49,7 @@ var apiCatalog = []apiEntry{
 	{ID: "goods-migrate", Category: "商品管理", Name: "迁移商品", Type: "temu.goods.migrate", Description: "商品迁移", SampleBody: `{}`},
 	{ID: "goods-edit-sensitive", Category: "商品管理", Name: "编辑敏感属性", Type: "temu.goods.edit.sensitive.attr", Description: "编辑商品敏感属性", SampleBody: `{}`},
 	{ID: "goods-edit-property", Category: "商品管理", Name: "编辑商品属性", Type: "temu.goods.edit.property", Description: "编辑商品属性", SampleBody: `{}`},
-	{ID: "goods-image-upload", Category: "商品管理", Name: "上传商品图片", Type: "bg.goods.image.upload.global", Description: "上传商品图片", SampleBody: `{}`},
+	{ID: "goods-image-upload", Category: "商品管理", Name: "上传商品图片", Type: "bg.goods.image.upload.global", Description: "上传商品图片（Partner 网关，image 为 base64）", SampleBody: goodsImageUploadSample},
 	{ID: "goods-sales", Category: "商品管理", Name: "商品销量", Type: "bg.goods.sales.get", Description: "查询商品销量（CN 网关）", SampleBody: `{"productSkcIds": [7469668867]}`},
 	{ID: "goods-life-search", Category: "商品管理", Name: "商品生命周期搜索", Type: "bg.glo.product.search", Description: "搜索商品生命周期", SampleBody: `{"pageNo": 1, "pageSize": 10}`},
 	{ID: "goods-topselling", Category: "商品管理", Name: "爆款售罄", Type: "temu.goods.topselling.soldout.get", Description: "查询爆款售罄商品", SampleBody: `{}`},

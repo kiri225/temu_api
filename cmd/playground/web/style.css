@@ -218,6 +218,141 @@ header h1 {
   font-size: 10px;
 }
 
+.samples-panel {
+  margin-top: 16px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.samples-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.samples-panel-header h3 {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.samples-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.samples-actions .btn-primary,
+.samples-actions .btn-secondary {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.sample-save-status {
+  margin: 8px 0;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.sample-save-status.ok {
+  background: rgba(61, 214, 140, 0.12);
+  color: var(--success);
+  border: 1px solid rgba(61, 214, 140, 0.25);
+}
+
+.sample-save-status.error {
+  background: rgba(240, 113, 120, 0.12);
+  color: var(--error);
+  border: 1px solid rgba(240, 113, 120, 0.25);
+}
+
+.param-notes-wrap {
+  max-height: 280px;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-top: 10px;
+}
+
+.param-notes-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.param-notes-table th,
+.param-notes-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  text-align: left;
+}
+
+.param-notes-table th {
+  position: sticky;
+  top: 0;
+  background: var(--surface2);
+  color: var(--text-muted);
+  font-weight: 600;
+  z-index: 1;
+}
+
+.param-notes-table .col-expand { width: 32px; }
+.param-notes-table .col-path { width: 28%; font-family: var(--font-mono); }
+.param-notes-table .col-type { width: 72px; color: var(--text-muted); }
+.param-notes-table .col-preview {
+  width: 22%;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  word-break: break-all;
+}
+.param-notes-table .col-note { width: auto; }
+
+.param-expand-btn {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: var(--surface2);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 10px;
+  line-height: 1;
+}
+
+.param-expand-btn:hover {
+  background: var(--border);
+  color: var(--text);
+}
+
+.param-expand-placeholder {
+  display: inline-block;
+  width: 24px;
+}
+
+.param-note-input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 12px;
+}
+
+.param-note-input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.param-row-hidden { display: none; }
+
 .api-item {
   display: flex;
   align-items: flex-start;

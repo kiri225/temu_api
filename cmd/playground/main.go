@@ -24,6 +24,7 @@ var (
 	client      *temu.Client
 	cfg         config.Config
 	unavailable *unavailableStore
+	samples     *sampleStore
 	auth        *authenticator
 )
 
@@ -31,6 +32,7 @@ func main() {
 	port := flag.Int("port", 8080, "监听端口")
 	configPath := flag.String("config", "./config/config.json", "配置文件路径")
 	unavailablePath := flag.String("unavailable", "./cmd/playground/unavailable.json", "不可用接口标记文件路径")
+	samplesPath := flag.String("samples", "./cmd/playground/api-samples.json", "接口测试示例与参数备注文件路径")
 	flag.Parse()
 
 	if err := loadClient(*configPath); err != nil {
@@ -40,6 +42,10 @@ func main() {
 	unavailable, err = newUnavailableStore(*unavailablePath)
 	if err != nil {
 		log.Fatalf("加载不可用标记失败: %v", err)
+	}
+	samples, err = newSampleStore(*samplesPath)
+	if err != nil {
+		log.Fatalf("加载测试示例失败: %v", err)
 	}
 	auth = newAuthenticator()
 
@@ -51,6 +57,7 @@ func main() {
 	mux.HandleFunc("/api/config", handleConfig)
 	mux.HandleFunc("/api/catalog", handleCatalog)
 	mux.HandleFunc("/api/unavailable", handleUnavailable)
+	mux.HandleFunc("/api/samples", handleSamples)
 	mux.HandleFunc("/api/invoke", handleInvoke)
 
 	webRoot, err := fs.Sub(webFS, "web")
@@ -64,6 +71,7 @@ func main() {
 	log.Printf("Temu API Playground 已启动: http://localhost%s", addr)
 	log.Printf("环境: %s | 区域: %s | 调试: %v", cfg.Env, cfg.Region, cfg.Debug)
 	log.Printf("不可用标记: %s", *unavailablePath)
+	log.Printf("测试示例: %s", *samplesPath)
 	if err := http.ListenAndServe(addr, handler); err != nil {
 		log.Fatal(err)
 	}
@@ -140,8 +148,9 @@ func handleCatalog(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, http.StatusOK, map[string]any{
 		"categories":  categoryOrder,
-		"apis":        applyUnavailableFlags(apiCatalog, unavailable),
+		"apis":        applySampleOverrides(applyUnavailableFlags(apiCatalog, unavailable), samples),
 		"unavailable": unavailable.snapshot(),
+		"samples":     samples.snapshot(),
 	})
 }
 
@@ -168,6 +177,36 @@ func handleUnavailable(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusOK, map[string]any{
 			"ok":          true,
 			"unavailable": unavailable.snapshot(),
+		})
+	default:
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func handleSamples(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		writeJSON(w, http.StatusOK, samples.snapshot())
+	case http.MethodPost:
+		var req sampleUpdateRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			writeJSON(w, http.StatusBadRequest, map[string]string{"error": "请求体格式错误: " + err.Error()})
+			return
+		}
+		req.ID = strings.TrimSpace(req.ID)
+		req.Type = strings.TrimSpace(req.Type)
+		if req.ID == "" && req.Type == "" {
+			writeJSON(w, http.StatusBadRequest, map[string]string{"error": "id 或 type 至少填一个"})
+			return
+		}
+		if err := samples.apply(req); err != nil {
+			writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]any{
+			"ok":      true,
+			"samples": samples.snapshot(),
+			"apis":    applySampleOverrides(applyUnavailableFlags(apiCatalog, unavailable), samples),
 		})
 	default:
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
