@@ -16,18 +16,13 @@ need_cmd() {
 }
 
 clone_repo() {
-  export GIT_TERMINAL_PROMPT=0
-  export GIT_HTTP_LOW_SPEED_LIMIT=1000
-  export GIT_HTTP_LOW_SPEED_TIME=30
-  if [[ "$REPO" == git@* ]]; then
-    export GIT_SSH_COMMAND="ssh -o ConnectTimeout=15 -o BatchMode=yes -o StrictHostKeyChecking=accept-new"
-  fi
+  git_http_env
   echo ">> 克隆仓库: $REPO (分支: $BRANCH，超时: ${GIT_CLONE_TIMEOUT}s)"
   mkdir -p "$(dirname "$INSTALL_DIR")"
   if command -v timeout >/dev/null 2>&1; then
-    timeout "$GIT_CLONE_TIMEOUT" git clone --progress -b "$BRANCH" "$REPO" "$INSTALL_DIR"
+    timeout "$GIT_CLONE_TIMEOUT" git clone --depth 1 --progress -b "$BRANCH" "$REPO" "$INSTALL_DIR"
   else
-    git clone --progress -b "$BRANCH" "$REPO" "$INSTALL_DIR"
+    git clone --depth 1 --progress -b "$BRANCH" "$REPO" "$INSTALL_DIR"
   fi
 }
 
@@ -37,6 +32,32 @@ clone_failed_hint() {
   echo "  1) 本机执行 remote-deploy.ps1（从本机同步代码，无需服务器 clone）" >&2
   echo "  2) 使用镜像: TEMU_REPO=https://ghproxy.com/https://github.com/kiri225/temu_api.git bash server-deploy.sh" >&2
   echo "  3) 在服务器配置 HTTP 代理后再 clone" >&2
+  echo "  4) 已手动 clone 后: SKIP_GIT_UPDATE=1 bash server-deploy.sh" >&2
+}
+
+git_http_env() {
+  export GIT_TERMINAL_PROMPT=0
+  export GIT_HTTP_LOW_SPEED_LIMIT=1000
+  export GIT_HTTP_LOW_SPEED_TIME=30
+  if [[ "$REPO" == git@* ]]; then
+    export GIT_SSH_COMMAND="ssh -o ConnectTimeout=15 -o BatchMode=yes -o StrictHostKeyChecking=accept-new"
+  fi
+}
+
+git_with_timeout() {
+  git_http_env
+  if command -v timeout >/dev/null 2>&1; then
+    timeout "$GIT_CLONE_TIMEOUT" git "$@"
+  else
+    git "$@"
+  fi
+}
+
+update_repo() {
+  echo ">> 更新代码: $INSTALL_DIR (超时: ${GIT_CLONE_TIMEOUT}s)"
+  git_with_timeout -C "$INSTALL_DIR" fetch origin "$BRANCH"
+  git_with_timeout -C "$INSTALL_DIR" checkout "$BRANCH"
+  git_with_timeout -C "$INSTALL_DIR" pull --ff-only origin "$BRANCH"
 }
 
 need_cmd git
@@ -46,14 +67,29 @@ docker compose version >/dev/null 2>&1 || { echo "需要 Docker Compose v2 (dock
 mkdir -p "$DATA_DIR/config"
 
 if [[ -d "$INSTALL_DIR/.git" ]]; then
-  echo ">> 更新代码: $INSTALL_DIR"
-  git -C "$INSTALL_DIR" fetch origin "$BRANCH"
-  git -C "$INSTALL_DIR" checkout "$BRANCH"
-  git -C "$INSTALL_DIR" pull --ff-only origin "$BRANCH"
+  if [[ "${SKIP_GIT_UPDATE:-}" == "1" ]]; then
+    echo ">> 跳过 git 更新 (SKIP_GIT_UPDATE=1)"
+  elif ! update_repo; then
+    echo ">> git 更新失败或超时，使用当前代码继续部署" >&2
+  fi
 elif [[ -f "$INSTALL_DIR/docker-compose.yml" ]]; then
   echo ">> 使用已有代码: $INSTALL_DIR (跳过克隆)"
 else
-  clone_repo || { clone_failed_hint; exit 1; }
+  if clone_repo; then
+    :
+  else
+    echo ">> git 克隆失败，尝试 tarball 下载..."
+    mkdir -p "$INSTALL_DIR"
+    TARBALL="https://github.com/kiri225/temu_api/archive/refs/heads/master.tar.gz"
+    MIRROR="https://ghproxy.com/https://github.com/kiri225/temu_api/archive/refs/heads/master.tar.gz"
+    if ! curl -fsSL --connect-timeout 30 --max-time 600 "$TARBALL" | tar -xz -C "$INSTALL_DIR" --strip-components=1; then
+      curl -fsSL --connect-timeout 30 --max-time 600 "$MIRROR" | tar -xz -C "$INSTALL_DIR" --strip-components=1
+    fi
+    if [[ ! -f "$INSTALL_DIR/docker-compose.yml" ]]; then
+      clone_failed_hint
+      exit 1
+    fi
+  fi
 fi
 
 if [[ ! -f "$DATA_DIR/config/config.json" ]]; then
